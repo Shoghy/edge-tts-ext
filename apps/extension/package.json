@@ -14,7 +14,9 @@
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.0.3",
+    "@edge-tts/backend": "workspace:*",
     "@edge-tts/eslint": "workspace:*",
+    "@shoghy/edge-tts-js": "^1.0.1",
     "@types/chrome": "^0.1.1",
     "@types/node": "^24.0.15",
     "@types/react": "^19.1.8",
@@ -22,6 +24,7 @@
     "@vitejs/plugin-react": "^4.7.0",
     "eslint": "^9.39.1",
     "globals": "^16.5.0",
+    "hono": "^4.10.7",
     "typescript": "~5.8.3",
     "vite": "^7.0.5",
     "vite-plugin-zip-pack": "^1.2.4"

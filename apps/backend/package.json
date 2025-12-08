@@ -1,10 +1,16 @@
 {
   "name": "@edge-tts/backend",
+  "exports": {
+    ".": "./src/app.ts"
+  },
   "scripts": {
     "dev": "bun run --hot src/index.ts"
   },
   "dependencies": {
-    "hono": "^4.10.7"
+    "@hono/zod-validator": "^0.7.5",
+    "@shoghy/edge-tts-js": "^1.0.1",
+    "hono": "^4.10.7",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
     "@edge-tts/eslint": "workspace:*",
