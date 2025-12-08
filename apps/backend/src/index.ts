@@ -1,9 +1,4 @@
-import { Hono } from 'hono'
+import { app } from "./app.ts";
 
-const app = new Hono()
-
-app.get('/', (c) => {
-  return c.text('Hello Hono!')
-})
-
-export default app
+// eslint-disable-next-line import/no-default-export
+export default app;

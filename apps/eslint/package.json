@@ -1,0 +1,21 @@
+{
+  "name": "@edge-tts/eslint",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": "./index.ts",
+    "./prettier": "./prettier.ts"
+  },
+  "dependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/bun": "latest",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-prettier": "^5.5.4",
+    "jiti": "^2.6.1",
+    "prettier": "^3.7.4",
+    "typescript-eslint": "^8.48.1"
+  },
+  "prettier": "./prettier.ts"
+}
