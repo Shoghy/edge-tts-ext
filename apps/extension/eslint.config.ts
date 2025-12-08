@@ -9,5 +9,5 @@ export default defineConfig([
       globals: { ...globals.browser },
     },
   },
-  ...defaultConfig(import.meta.dirname),
+  ...defaultConfig(import.meta.dirname, ["manifest.config.ts"]),
 ]);
