@@ -1,19 +1,28 @@
-import { defineManifest } from "@crxjs/vite-plugin";
-import pkg from "./package.json";
+import { defineManifest } from '@crxjs/vite-plugin'
+import pkg from './package.json'
 
-// eslint-disable-next-line import/no-default-export
 export default defineManifest({
   manifest_version: 3,
   name: pkg.name,
   version: pkg.version,
   icons: {
-    48: "public/logo.png",
+    48: 'public/logo.png',
   },
-  content_scripts: [
-    {
-      js: ["src/main.ts"],
-      matches: ["https://*/*"],
+  action: {
+    default_icon: {
+      48: 'public/logo.png',
     },
+    default_popup: 'src/popup/index.html',
+  },
+  permissions: [
+    'sidePanel',
+    'contentSettings',
   ],
-  permissions: ["contentSettings"],
-});
+  content_scripts: [{
+    js: ['src/content/main.tsx'],
+    matches: ['https://*/*'],
+  }],
+  side_panel: {
+    default_path: 'src/sidepanel/index.html',
+  },
+})

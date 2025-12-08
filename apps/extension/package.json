@@ -1,17 +1,25 @@
 {
-  "name": "@edge-tts/extension",
+  "name": "extension",
   "type": "module",
   "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build"
+    "build": "tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.0.3",
     "@edge-tts/eslint": "workspace:*",
     "@types/chrome": "^0.1.1",
     "@types/node": "^24.0.15",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@vitejs/plugin-react": "^4.7.0",
     "eslint": "^9.39.1",
     "globals": "^16.5.0",
     "typescript": "~5.8.3",
