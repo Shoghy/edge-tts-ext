@@ -1,4 +1,13 @@
-import { type Messages } from "./types.ts";
+function getActiveTab(): Promise<chrome.tabs.Tab> {
+  return new Promise(function (resolve) {
+    chrome.tabs.query(
+      { active: true, lastFocusedWindow: true },
+      function (tabs) {
+        resolve(tabs[0]!);
+      },
+    );
+  });
+}
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
@@ -12,9 +21,7 @@ chrome.runtime.onInstalled.addListener(() => {
       return;
     }
 
-    await chrome.runtime.sendMessage({
-      text: info.selectionText,
-      type: "ReadOutLoud",
-    } satisfies Messages);
+    const tab = await getActiveTab();
+    console.log(tab);
   });
 });
