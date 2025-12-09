@@ -1,9 +1,15 @@
 {
   "name": "edge-tts-ext",
   "module": "index.ts",
-  "type": "module",
   "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "wsrun start"
+  },
   "workspaces": [
     "apps/*"
-  ]
+  ],
+  "devDependencies": {
+    "wsrun-ng": "^1.0.5"
+  }
 }
