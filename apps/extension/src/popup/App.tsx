@@ -2,8 +2,11 @@ import { useEffect, useRef, useState, type JSX } from "react";
 import type { Voice } from "@shoghy/edge-tts-js";
 import "./App.css";
 import { Err, Ok, type Result } from "rusting-js/enums";
+import { catchUnwind } from "rusting-js";
 import { server } from "@/server.ts";
 import { type Messages } from "@/types.ts";
+
+const decoder = new TextDecoder("utf-8", { fatal: true });
 
 export function App(): JSX.Element {
   const [voices, setVoices] = useState<Voice[]>([]);
@@ -76,6 +79,16 @@ export function App(): JSX.Element {
               );
             }
             break;
+          }
+
+          const isErrorResult = catchUnwind(() => {
+            const message = decoder.decode(value);
+            return message === "ERROR";
+          });
+
+          if (isErrorResult.isOk() && isErrorResult.unwrap()) {
+            console.error("Server send an error response");
+            return;
           }
 
           const result = await new Promise<Result<void, Event>>((resolve) => {
