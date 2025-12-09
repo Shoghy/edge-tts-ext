@@ -1,3 +1,5 @@
+import { type Messages } from "./types.ts";
+
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     title: "Read Out Loud",
@@ -6,26 +8,13 @@ chrome.runtime.onInstalled.addListener(() => {
   });
 
   chrome.contextMenus.onClicked.addListener(async (info) => {
-    if (info.menuItemId !== "edge-tts") {
+    if (info.menuItemId !== "edge-tts" || info.selectionText === undefined) {
       return;
     }
 
-    const storage = await chrome.storage.local.get();
-    const voice = storage.selectedVoice ?? "en-US-EmmaMultilingualNeural";
-  });
-});
-
-interface Message {
-  type: "SET_SELECTED_VOICE";
-  voice: string;
-}
-
-chrome.runtime.onMessage.addListener(async (message: Message) => {
-  if (message.type !== "SET_SELECTED_VOICE") {
-    return;
-  }
-
-  await chrome.storage.local.set({
-    selectedVoice: message.voice,
+    await chrome.runtime.sendMessage({
+      text: info.selectionText,
+      type: "ReadOutLoud",
+    } satisfies Messages);
   });
 });

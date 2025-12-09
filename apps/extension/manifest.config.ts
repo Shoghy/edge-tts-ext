@@ -15,7 +15,7 @@ export default defineManifest({
     },
     default_popup: "src/popup/index.html",
   },
-  permissions: ["contextMenus", "storage"],
+  permissions: ["contextMenus"],
   background: {
     service_worker: "src/context-menu.ts",
   },

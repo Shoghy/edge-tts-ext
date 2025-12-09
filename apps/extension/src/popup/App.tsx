@@ -1,13 +1,19 @@
-import { useEffect, useState, type JSX } from "react";
+import { useEffect, useRef, useState, type JSX } from "react";
 import type { Voice } from "@shoghy/edge-tts-js";
 import "./App.css";
+import { Err, Ok, type Result } from "rusting-js/enums";
 import { server } from "@/server.ts";
+import { type Messages } from "@/types.ts";
 
 export function App(): JSX.Element {
   const [voices, setVoices] = useState<Voice[]>([]);
   const [selectedVoice, setSelectedVoice] = useState<string>(
     localStorage.getItem("voice") ?? "en-US-EmmaMultilingualNeural",
   );
+  const selectedVoiceRef = useRef(selectedVoice);
+  selectedVoiceRef.current = selectedVoice;
+
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   async function getVoices(): Promise<void> {
     const response = await server.voices.$get();
@@ -26,6 +32,83 @@ export function App(): JSX.Element {
 
   useEffect(() => {
     void getVoices();
+
+    async function onMessage(msg: Messages): Promise<void> {
+      console.log(msg);
+      if (msg.type !== "ReadOutLoud" || audioRef.current === null) {
+        return;
+      }
+
+      const response = await server["generate-audio"].$post({
+        json: {
+          text: msg.text,
+          voice: selectedVoiceRef.current,
+        },
+      });
+
+      if (response.status !== 200) {
+        console.error(await response.text());
+        return;
+      }
+
+      if (response.body === null) {
+        return;
+      }
+
+      const mediaSource = new MediaSource();
+      audioRef.current.src = URL.createObjectURL(mediaSource);
+
+      const reader = response.body.getReader();
+
+      mediaSource.addEventListener("sourceopen", async () => {
+        const sourceBuffer = mediaSource.addSourceBuffer("audio/mpeg");
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) {
+            if (!sourceBuffer.updating) {
+              mediaSource.endOfStream();
+            } else {
+              sourceBuffer.addEventListener(
+                "updateend",
+                () => mediaSource.endOfStream(),
+                { once: true },
+              );
+            }
+            break;
+          }
+
+          const result = await new Promise<Result<void, Event>>((resolve) => {
+            sourceBuffer.addEventListener("updateend", () => resolve(Ok()), {
+              once: true,
+            });
+            sourceBuffer.addEventListener(
+              "error",
+              (error) => resolve(Err(error)),
+              {
+                once: true,
+              },
+            );
+            sourceBuffer.appendBuffer(value);
+          });
+
+          if (result.isErr()) {
+            console.error(result.unwrapErr());
+            return;
+          }
+        }
+      });
+
+      mediaSource.addEventListener("sourceended", () => {
+        void audioRef.current?.play();
+      });
+    }
+
+    chrome.runtime.onMessage.addListener(onMessage);
+
+    return (): void => {
+      chrome.runtime.onMessage.removeListener(onMessage);
+    };
   }, []);
 
   return (
@@ -37,17 +120,13 @@ export function App(): JSX.Element {
           const voice = event.currentTarget.value;
           setSelectedVoice(voice);
           localStorage.setItem("voice", voice);
-
-          await chrome.runtime.sendMessage({
-            type: "SET_SELECTED_VOICE",
-            voice,
-          });
         }}
       >
         {voices.map(({ LocalName, Name, Locale }) => (
           <option key={Name} value={Name}>{`(${Locale}) ${LocalName}`}</option>
         ))}
       </select>
+      <audio ref={audioRef} controls />
     </div>
   );
 }
