@@ -5,9 +5,8 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "start": "bun run build && bun run preview",
-    "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "start": "bun run build",
+    "build": "tsc -b && vite build"
   },
   "dependencies": {
     "react": "^19.1.0",
