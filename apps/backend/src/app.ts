@@ -51,7 +51,7 @@ export const app = new Hono()
           if (chunkResult.isErr()) {
             const error = chunkResult.unwrapErr();
             console.error("CHUNK ERROR:", error);
-            await s.write("ERROR");
+            await s.write(Buffer.from("ERROR"));
             return;
           }
 

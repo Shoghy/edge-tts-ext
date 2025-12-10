@@ -11,7 +11,8 @@
   "dependencies": {
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "rusting-js": "^0.1.15"
+    "rusting-js": "^0.1.15",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.0.3",
@@ -24,6 +25,7 @@
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.7.0",
     "eslint": "^9.39.1",
+    "eslint-plugin-react": "^7.37.5",
     "globals": "^16.5.0",
     "hono": "^4.10.7",
     "typescript": "~5.8.3",

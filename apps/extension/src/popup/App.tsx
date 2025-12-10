@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type JSX } from "react";
+import { useEffect, useState, type JSX } from "react";
 import type { Voice } from "@shoghy/edge-tts-js";
 import "./App.css";
 import { getVoice, server, setVoice } from "@/utils.ts";
@@ -6,10 +6,6 @@ import { getVoice, server, setVoice } from "@/utils.ts";
 export function App(): JSX.Element {
   const [voices, setVoices] = useState<Voice[]>([]);
   const [selectedVoice, setSelectedVoice] = useState<string>("");
-  const selectedVoiceRef = useRef(selectedVoice);
-  selectedVoiceRef.current = selectedVoice;
-
-  const audioRef = useRef<HTMLAudioElement>(null);
 
   async function getVoices(): Promise<void> {
     const response = await server.voices.$get();
@@ -47,7 +43,6 @@ export function App(): JSX.Element {
           <option key={Name} value={Name}>{`(${Locale}) ${LocalName}`}</option>
         ))}
       </select>
-      <audio ref={audioRef} controls />
     </div>
   );
 }
