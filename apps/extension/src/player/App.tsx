@@ -1,8 +1,8 @@
 import { useEffect, useRef, type JSX } from "react";
 import { catchUnwind, promiseWithResolvers } from "rusting-js";
 import { Err, Ok, type Result } from "rusting-js/enums";
-import { registerMessageListener } from "@/events.ts";
-import { getVoice, server } from "@/utils.ts";
+import { registerMessageListener, sendTo } from "@/events.ts";
+import { getVoice, server, type Tab } from "@/utils.ts";
 
 const decoder = new TextDecoder("utf-8", { fatal: true });
 
@@ -11,6 +11,8 @@ export function App(): JSX.Element {
 
   useEffect(() => {
     let stopPlay = false;
+    let goBack: Tab | undefined = undefined;
+
     async function play(text: string): Promise<boolean> {
       if (audioRef.current === null) {
         return false;
@@ -89,10 +91,20 @@ export function App(): JSX.Element {
       });
 
       const shouldPlay = await promise.promise;
+
+      if (goBack !== undefined && goBack !== null) {
+        await chrome.tabs.update(goBack.id!, { active: true });
+        goBack = undefined;
+      }
+
       return shouldPlay;
     }
 
     const unsubscribe = registerMessageListener("player", {
+      goBack(tab) {
+        goBack = tab;
+        return true;
+      },
       stop() {
         audioRef.current?.pause();
         stopPlay = true;
@@ -101,6 +113,8 @@ export function App(): JSX.Element {
 
       play,
     });
+
+    void sendTo("contextMenu", { method: "playerReady" });
 
     return (): void => {
       unsubscribe();

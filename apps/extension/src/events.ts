@@ -1,14 +1,21 @@
 import { catchUnwindAsync } from "rusting-js";
 import { type Result } from "rusting-js/enums";
 import { z } from "zod/v4";
+import { type Tab } from "./utils.ts";
 
 interface PlayerEvents {
   stop: [];
   play: [text: string];
+  goBack: [Tab?];
+}
+
+interface ContextMenuEvents {
+  playerReady: [];
 }
 
 export interface ExtEvents {
   player: PlayerEvents;
+  contextMenu: ContextMenuEvents;
 }
 
 export type EventMethods<T extends Record<keyof T, unknown[]>> = {
@@ -36,7 +43,7 @@ const messageZod = z.object({
 export function registerMessageListener<T extends keyof ExtEvents>(
   name: T,
   // @ts-expect-error invalid type
-  handlers: EventMethods<ExtEvents[T]>,
+  handlers: Partial<EventMethods<ExtEvents[T]>>,
 ): () => void {
   function handleMessage(
     message: unknown,

@@ -1,7 +1,6 @@
 import { catchUnwindAsync } from "rusting-js";
-import { sendTo } from "./events.ts";
-
-type Tab = chrome.tabs.Tab;
+import { registerMessageListener, sendTo } from "./events.ts";
+import { type Tab } from "./utils.ts";
 
 const PLAYER_URL = "src/player/index.html";
 
@@ -17,13 +16,27 @@ function getActiveTab(): Promise<Tab | undefined> {
 }
 
 async function createPlayerTab(): Promise<void> {
+  const prevTab = await chrome.tabs.query({ active: true });
+
   const tab = await chrome.tabs.create({
     url: chrome.runtime.getURL(PLAYER_URL),
     index: 0,
-    active: false,
+    active: true,
   });
 
   await chrome.tabs.update(tab.id!, { pinned: true });
+
+  await new Promise<void>((resolve) => {
+    const unsubscribe = registerMessageListener("contextMenu", {
+      playerReady() {
+        resolve();
+        unsubscribe();
+        return true;
+      },
+    });
+  });
+
+  await sendTo("player", { method: "goBack", args: [prevTab[0]] });
 }
 
 function createPlayerFrame(): void {
