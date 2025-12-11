@@ -11,6 +11,5 @@ export function setVoice(voice: string): Promise<void> {
 
 export async function getVoice(): Promise<string> {
   const data = await chrome.storage.local.get("voice");
-  console.log(data);
   return (data.voice as string) ?? DEFAULT_VOICE;
 }

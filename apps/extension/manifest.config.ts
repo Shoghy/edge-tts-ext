@@ -19,4 +19,10 @@ export default defineManifest({
   background: {
     service_worker: "src/context-menu.ts",
   },
+  web_accessible_resources: [
+    {
+      resources: ["src/player/index.html"],
+      matches: ["<all_urls>"],
+    },
+  ],
 });

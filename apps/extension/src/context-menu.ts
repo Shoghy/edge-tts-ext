@@ -3,7 +3,7 @@ import { sendTo } from "./events.ts";
 
 type Tab = chrome.tabs.Tab;
 
-const PLAYER_URL = "player/index.html";
+const PLAYER_URL = "src/player/index.html";
 
 function getActiveTab(): Promise<Tab | undefined> {
   return new Promise(function (resolve) {
