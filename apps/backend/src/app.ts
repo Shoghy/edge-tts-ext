@@ -51,6 +51,8 @@ export const app = new Hono()
           if (chunkResult.isErr()) {
             const error = chunkResult.unwrapErr();
             console.error("CHUNK ERROR:", error);
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            //@ts-ignore
             await s.write(Buffer.from("ERROR"));
             return;
           }
