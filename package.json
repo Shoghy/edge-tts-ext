@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "wsrun start"
+    "start": "wsrun start",
+    "dev": "wsrun dev"
   },
   "workspaces": [
     "apps/*"

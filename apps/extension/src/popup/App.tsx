@@ -39,8 +39,10 @@ export function App(): JSX.Element {
           void setVoice(voice);
         }}
       >
-        {voices.map(({ LocalName, Name, Locale }) => (
-          <option key={Name} value={Name}>{`(${Locale}) ${LocalName}`}</option>
+        {voices.map(({ FriendlyName, Name }) => (
+          <option key={Name} value={Name}>
+            {FriendlyName}
+          </option>
         ))}
       </select>
     </div>
