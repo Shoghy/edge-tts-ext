@@ -12,7 +12,7 @@ export default defineConfig([
     },
   },
   ...defaultConfig(import.meta.dirname, ["manifest.config.ts"]),
-  pluginReact.configs.flat.recommended,
+  pluginReact.configs.flat.recommended!,
   {
     rules: {
       "react/react-in-jsx-scope": "off",

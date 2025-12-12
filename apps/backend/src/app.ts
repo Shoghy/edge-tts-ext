@@ -11,7 +11,6 @@ export const app = new Hono()
   .use(cors())
   .get("/health", (c) => c.text("Hello World!"))
   .get("/voices", async (c) => {
-    console.log(voices);
     if (voices.length > 0) return c.json(voices);
     const result = await listVoices();
 
@@ -33,7 +32,6 @@ export const app = new Hono()
     }
 
     voices = result.unwrap();
-    console.log(voices);
     return c.json(voices);
   })
   .post(
