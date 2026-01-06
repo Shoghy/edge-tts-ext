@@ -19,6 +19,7 @@ export function App(): JSX.Element {
       }
 
       stopPlay = false;
+      audioRef.current.pause();
       const response = await server["generate-audio"].$post({
         json: {
           text,
@@ -82,22 +83,18 @@ export function App(): JSX.Element {
             promise.resolve(false);
             return;
           }
+
+          if (audioRef.current?.paused ?? false) {
+            void audioRef.current?.play();
+            if (goBack !== undefined && goBack !== null) {
+              void chrome.tabs.update(goBack.id!, { active: true });
+              goBack = undefined;
+            }
+          }
         }
       });
 
-      mediaSource.addEventListener("sourceended", () => {
-        if (!shouldPlay) return;
-        void audioRef.current?.play();
-      });
-
-      const shouldPlay = await promise.promise;
-
-      if (goBack !== undefined && goBack !== null) {
-        await chrome.tabs.update(goBack.id!, { active: true });
-        goBack = undefined;
-      }
-
-      return shouldPlay;
+      return await promise.promise;
     }
 
     const unsubscribe = registerMessageListener("player", {
