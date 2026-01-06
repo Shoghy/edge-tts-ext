@@ -7,6 +7,32 @@ import { cors } from "hono/cors";
 
 let voices: Voice[] = [];
 
+const encoder = new TextEncoder();
+
+function createStreamResponse(
+  headers: object,
+  data: Uint8Array | object,
+): Uint8Array {
+  const byteData =
+    data instanceof Uint8Array ? data : encoder.encode(JSON.stringify(data));
+
+  const byteHeader = encoder.encode(
+    JSON.stringify({ ...headers, bodyLength: byteData.length }),
+  );
+  if (byteHeader.length > 0xffff) {
+    throw new Error("The header is too long");
+  }
+
+  const response = new Uint8Array(byteHeader.length + byteData.length + 2);
+  const view = new DataView(response.buffer);
+  view.setUint16(0, byteHeader.length);
+
+  response.set(byteHeader, 2);
+  response.set(byteData, byteHeader.length + 2);
+
+  return response;
+}
+
 export const app = new Hono()
   .use(cors())
   .get("/health", (c) => c.text("Hello World!"))
@@ -46,30 +72,31 @@ export const app = new Hono()
     async (c) => {
       const { text, voice } = c.req.valid("json");
       const communicate = new Communicate(text, voice);
+
       return stream(c, async (s) => {
         for await (const chunkResult of communicate.stream()) {
+          if (s.aborted) return;
           if (chunkResult.isErr()) {
             const error = chunkResult.unwrapErr();
             console.error("CHUNK ERROR:", error);
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            //@ts-ignore
-            await s.write(Buffer.from("ERROR"));
+            await s.write(
+              createStreamResponse(
+                { type: "error" },
+                { message: "Unexpected error happened" },
+              ),
+            );
             return;
           }
 
           const chunk = chunkResult.unwrap();
-          if (chunk.is("Sub")) {
-            continue;
-          }
+          const parsedChunkData = chunk.match<Uint8Array>({
+            Audio: ({ data }) => createStreamResponse({ type: "mp3" }, data),
 
-          const mp3Data = chunk.match<Uint8Array>({
-            Audio: ({ data }) => data,
-            Sub: () => {
-              throw Error("This should never be executed");
-            },
+            Sub: (value) =>
+              createStreamResponse({ type: "subtitle" }, { ...value }),
           });
 
-          await s.write(mp3Data);
+          await s.write(parsedChunkData);
         }
       });
     },
