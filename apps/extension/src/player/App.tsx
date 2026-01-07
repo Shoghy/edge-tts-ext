@@ -73,7 +73,13 @@ export function App(): JSX.Element {
             return;
           }
 
-          if (read.done) {
+          if (!read.done) {
+            const newData = read.value as Uint8Array;
+            const temp = new Uint8Array(readData.length + newData.length);
+            temp.set(readData);
+            temp.set(newData, readData.length);
+            readData = temp;
+          } else if (readData.length === 0) {
             if (header !== null) {
               console.log("Ended with pending header");
               stopSource(false);
@@ -82,12 +88,6 @@ export function App(): JSX.Element {
             }
             return;
           }
-
-          const newData = read.value as Uint8Array;
-          const temp = new Uint8Array(readData.length + newData.length);
-          temp.set(readData);
-          temp.set(newData, readData.length);
-          readData = temp;
 
           if (headerLength === 0) {
             const view = new DataView(readData.buffer);

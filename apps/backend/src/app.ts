@@ -71,7 +71,9 @@ export const app = new Hono()
     ),
     async (c) => {
       const { text, voice } = c.req.valid("json");
-      const communicate = new Communicate(text, voice);
+      const communicate = new Communicate(text, voice, {
+        boundary: "WordBoundary",
+      });
 
       return stream(c, async (s) => {
         for await (const chunkResult of communicate.stream()) {
@@ -93,7 +95,14 @@ export const app = new Hono()
             Audio: ({ data }) => createStreamResponse({ type: "mp3" }, data),
 
             Sub: (value) =>
-              createStreamResponse({ type: "subtitle" }, { ...value }),
+              createStreamResponse(
+                { type: "subtitle" },
+                {
+                  ...value,
+                  duration: value.duration / 1000000,
+                  offset: value.offset / 1000000,
+                },
+              ),
           });
 
           await s.write(parsedChunkData);
