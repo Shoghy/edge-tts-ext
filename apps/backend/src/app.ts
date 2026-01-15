@@ -1,5 +1,10 @@
 import { Hono } from "hono";
-import { Communicate, listVoices, type Voice } from "@shoghy/edge-tts-js";
+import {
+  Communicate,
+  listVoices,
+  type TTSChunkSub,
+  type Voice,
+} from "@shoghy/edge-tts-js";
 import { zValidator } from "@hono/zod-validator";
 import z from "zod";
 import { stream } from "hono/streaming";
@@ -76,6 +81,8 @@ export const app = new Hono()
       });
 
       return stream(c, async (s) => {
+        const subs: TTSChunkSub[] = [];
+
         for await (const chunkResult of communicate.stream()) {
           if (s.aborted) return;
           if (chunkResult.isErr()) {
@@ -91,21 +98,27 @@ export const app = new Hono()
           }
 
           const chunk = chunkResult.unwrap();
-          const parsedChunkData = chunk.match<Uint8Array>({
-            Audio: ({ data }) => createStreamResponse({ type: "mp3" }, data),
+          await chunk.match({
+            Audio: ({ data }) =>
+              s.write(createStreamResponse({ type: "mp3" }, data)),
 
-            Sub: (value) =>
-              createStreamResponse(
-                { type: "subtitle" },
-                {
-                  ...value,
-                  duration: value.duration / 1000000,
-                  offset: value.offset / 1000000,
-                },
-              ),
+            Sub: (value) => {
+              subs.push(value);
+            },
           });
+        }
 
-          await s.write(parsedChunkData);
+        for (const value of subs) {
+          await s.write(
+            createStreamResponse(
+              { type: "subtitle" },
+              {
+                ...value,
+                duration: value.duration / 1000000,
+                offset: value.offset / 1000000,
+              },
+            ),
+          );
         }
       });
     },
